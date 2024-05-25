@@ -1183,9 +1183,7 @@ int main(){
 		if(GetVsyncFlag()){
 			ClearVsyncFlag();
 			on_keypressed(kb_read(KB_SEND_END));
-			//uint8_t t = kb_readByte(KB_SEND_END);
-			//dbgb(10,10,t);
-			//if(t){while(1);}
+
 			if(!sysram[0xCC]){//cursor enabled
 				if(!sysram[0xCD]--){
 					uint8_t phase = sysram[0xCF];//0 if reversed, 1 if not
