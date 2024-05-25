@@ -925,86 +925,79 @@ void on_keypressed(uint8_t code){ // Called when key pressed or released
 
 
 uint8_t kb_read(){
-  uint8_t code = 0, scnval = 0;
-  static uint8_t modifier;
+	uint8_t code = 0, scnval = 0;
+	static uint8_t modifier;
 
-  uint8_t kbbyte = kb_readByte(KB_SEND_END);
-  switch (kbbyte)
-  {
-  case CRSR: //Cursor control
-    scnval = kb_readByte(KB_SEND_END);
-    modifier = CRSR;
-    if (scnval == BREAK)
-    {
-      kb_readByte(KB_SEND_END);
-      modifier = IDLE;
-      scnval = 0;
-    }
-    break;
-  case BREAK:
-    kbbyte = kb_readByte(KB_SEND_END);
-    if (modifier && modifier == kbbyte)
-      modifier = IDLE;
-    break;
-  case SHIFT: //Shift key
-  case ALT_L: //-> Commodore
-  case CTRL:
-    modifier = kbbyte;
-    break;
-  case ERR_TIMEOUT:
-    //scnval = ERR_TIMEOUT;
-  break;
-  default:
-    scnval = kbbyte;
-    break;
-  }
-  if (!scnval || scnval > 127)
-    return 0;
-#ifdef KBTEST
-  Debug.print(DBG_INFO, "modifier: %x, value: %d", modifier, scnval);
-#endif
+	uint8_t kbbyte = kb_readByte(KB_SEND_END);
+	switch (kbbyte){
+		case CRSR: //Cursor control
+			scnval = kb_readByte(KB_SEND_END);
+			modifier = CRSR;
+			if(scnval == BREAK){
+				kb_readByte(KB_SEND_END);
+				modifier = IDLE;
+				scnval = 0;
+			}
+		break;
 
-  switch (modifier)
-  {
-  case CRSR:
-    switch (scnval)
-    {
-    case 0x74: //CRSR RIGHT
-      code = 29;
-      break;
-    case 0x72: //CRSR DN
-      code = 17;
-      break;
-    case 0x6B: //CRSR LEFT
-      code = 157;
-      break;
-    case 0x75: //CRSR UP
-      code = 145;
-      break;
-    case 0x70: //INST
-      code = 148;
-      break;
-    case 0x6C:   //POS1
-      code = 19; //HOME
-      break;
-    case 0x71: //DEL
-      code = 20;
-      break;
-    }
-    break;
-  case IDLE:
-    code = pgm_read_byte(scancodes + scnval);
-    break;
-  case SHIFT:
-    code = pgm_read_byte(scancodes_l2 + scnval);
-    break;
-  default:
-    code = 0;
-  }
-#ifdef KBTEST
-  Debug.print(DBG_INFO, "modifier: %x, petscii: %d", modifier, code);
-#endif
-  return code;
+	case BREAK:
+		kbbyte = kb_readByte(KB_SEND_END);
+		if(modifier && modifier == kbbyte)
+			modifier = IDLE;
+		break;
+	case SHIFT: //Shift key
+	case ALT_L: //-> Commodore
+	case CTRL:
+		modifier = kbbyte;
+		break;
+	case ERR_TIMEOUT:
+		//scnval = ERR_TIMEOUT;
+	break;
+	default:
+		scnval = kbbyte;
+		break;
+	}
+	if(!scnval || scnval > 127)
+		return 0;
+
+	switch(modifier){
+	case CRSR:
+		switch (scnval){
+		case 0x74: //CRSR RIGHT
+			code = 29;
+			break;
+		case 0x72: //CRSR DN
+			code = 17;
+			break;
+		case 0x6B: //CRSR LEFT
+			code = 157;
+			break;
+		case 0x75: //CRSR UP
+			code = 145;
+			break;
+		case 0x70: //INST
+			code = 148;
+			break;
+		case 0x6C:   //POS1
+			code = 19; //HOME
+			break;
+		case 0x71: //DEL
+			code = 20;
+			break;
+		}
+		break;
+
+	case IDLE:
+		code = pgm_read_byte(scancodes + scnval);
+		break;
+
+	case SHIFT:
+		code = pgm_read_byte(scancodes_l2 + scnval);
+		break;
+	default:
+		code = 0;
+	}
+	return code;
 }
 
 
@@ -1195,7 +1188,7 @@ int main(){
 			//if(t){while(1);}
 			if(!sysram[0xCC]){//cursor enabled
 				if(!sysram[0xCD]--){
-					uint8_t phase = sysram[0xCF];//0 if reversd, 1 if not
+					uint8_t phase = sysram[0xCF];//0 if reversed, 1 if not
 					uint8_t cuc = sysram[0xCE];//character under cursor
 					uint16_t pos = ((sysram[0xD2] << 8) + sysram[0xD1] - VIDEOADDR) + sysram[0xD3];
 					phase ^= 1;
