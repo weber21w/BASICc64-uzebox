@@ -45,43 +45,54 @@ extern volatile unsigned int joypad1_status_hi,joypad2_status_hi;
 		spiram_state = 0;
 		if(!SpiRamInit())
 			return 0;
-		SpiRamSeqReadStart(0, 0xFFFC);
+		SpiRamSeqReadStart(0, (uint16_t)0xFFFC);
 		return 1;
 	}
 
 	uint8_t SpiRamCursorRead(uint16_t addr){
 		if(spiram_state){//in a sequential write?
 			SpiRamSeqWriteEnd();
+			asm("nop");asm("nop");
 			SpiRamSeqReadStart(0, addr);
+			asm("nop");asm("nop");
 			spiram_state = 0;
-			spiram_cursor = addr;
+			spiram_cursor = addr+1;
 			return SpiRamSeqReadU8();
 		}
 		if(spiram_cursor != addr){//current sequential read position doesn't match?
 			SpiRamSeqReadEnd();
+			asm("nop");asm("nop");
 			SpiRamSeqReadStart(0, addr);
-			spiram_cursor = addr;
+			asm("nop");asm("nop");
+			spiram_cursor = addr+1;
 			return SpiRamSeqReadU8();
 		}
+		spiram_cursor++;
 		return SpiRamSeqReadU8();
 	}
 
 	void SpiRamCursorWrite(uint16_t addr, uint8_t val){
 		if(!spiram_state){//in a sequential read?
 			SpiRamSeqReadEnd();
+			asm("nop");asm("nop");
 			SpiRamSeqWriteStart(0, addr);
 			spiram_state = 1;
-			spiram_cursor = addr;
+			spiram_cursor = addr+1;
+			asm("nop");asm("nop");
 			SpiRamSeqWriteU8(val);
 			return;
 		}
 		if(spiram_cursor != addr){//current sequential write position doesn't match?
 			SpiRamSeqWriteEnd();
+			asm("nop");asm("nop");
 			SpiRamSeqWriteStart(0, addr);
-			spiram_cursor = addr;
+			spiram_cursor = addr+1;
+			asm("nop");asm("nop");
 			SpiRamSeqWriteU8(val);
 			return;
 		}
+		spiram_cursor++;
+		SpiRamSeqWriteU8(val);
 	}
 #endif
 
