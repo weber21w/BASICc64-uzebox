@@ -22,9 +22,12 @@
 #include <stdlib.h>
 #include <avr/pgmspace.h>
 #include <uzebox.h>
-#include "data/hack-font.inc"
-#include "data/roms.inc"
+//#include "data/hack-font.inc"
+#include "data/c64-upper.inc"
 #include "data/scancodes.inc"
+
+#include "data/roms.inc"
+
 
 extern volatile unsigned int joypad1_status_lo,joypad2_status_lo;
 extern volatile unsigned int joypad1_status_hi,joypad2_status_hi;
@@ -201,7 +204,7 @@ uint8_t opcode, oldcpustatus, useaccum;
 
 #define VIDEOADDR 0x400
 #define VIDEOLEN 1024
-#define RAMSIZE 101//101 //More memory will make it unstable
+#define RAMSIZE 701//101 //More memory will make it unstable
 #define EESIZE 0//1024
 
 #define LOW_MEM_TOP 0x333 // Page 0: 0x000-0xFF, stack: 0x100-0x1FF, Kernal & Basic working area: 0x200-0x3ff
@@ -214,7 +217,7 @@ uint8_t basicram[RAMSIZE];
 
 uint8_t m_read(uint16_t address){
 	//HACKITY HACK HACK
-	sysram[0x38]=0x08;sysram[0x37] = RAMSIZE;//HACK set end of BASIC RAM, how did this work on an Uno with unmodified kernal??
+//	sysram[0x38]=0x08;sysram[0x37] = RAMSIZE;//HACK set end of BASIC RAM, how did this work on an Uno with unmodified kernal??
 
 	if(address <= LOW_MEM_TOP)
 		return (sysram[address]);
@@ -1013,9 +1016,20 @@ uint8_t kb_read(){
 
 
 int main(){
-	SetTileTable(hack_font);
+	SetTileTable(m40_c64_graphics);
+//	SetTileTable(m40_c64_alpha);
+//	SetTileTable(m40_c64_mixed);
 	ClearVram();
-//	SetBorderColor(0xBFU);
+
+	for(uint16_t i=0;i<VRAM_SIZE;i++){
+		aram[i] = (1<<4);
+		//aram[(i*2)] = 2;
+	}
+	SetBorderColor(0xDB);
+	palette[4] = 0xDB;//0b11011011;//font color
+	palette[5] = 0x89;//0b10000000;
+
+
 #ifndef NO_SPI_RAM
 	SpiRamCursorInit();
 #endif
@@ -1191,6 +1205,10 @@ int main(){
 #ifdef USE_TIMING
 	//	clockgoal6502 -= (int32_t)pgm_read_byte_near(ticktable + opcode);
 #endif
+
+		if(pc == 0xFFBD){
+//ClearVram();
+}
 		if(GetVsyncFlag()){
 			ClearVsyncFlag();
 			on_keypressed(kb_read(KB_SEND_END));
@@ -1201,9 +1219,13 @@ int main(){
 					uint8_t cuc = sysram[0xCE];//character under cursor
 					uint16_t pos = ((sysram[0xD2] << 8) + sysram[0xD1] - VIDEOADDR) + sysram[0xD3];
 					phase ^= 1;
-					if(phase)
+				/*	if(phase)
 						cuc = vram[pos];
-				//	vram[pos] = cuc | (phase << 7);//invert it
+					vram[pos] = cuc | (phase << 7);//invert it
+*/
+					vram[pos] &= 127;
+					if(phase)
+						vram[pos] += 64;
 					sysram[0xCD] = 20;//blink phase
 				}
 			}
