@@ -12,8 +12,9 @@ INFO=../gameinfo.properties
 
 ## Kernel settings
 KERNEL_DIR = ../../../kernel
-KERNEL_OPTIONS  = -DINTRO_LOGO=0 -DVIDEO_MODE=5 -DSCREEN_TILES_V=25 -DVRAM_TILES_V=25 -DCONTROLLERS_VSYNC_READ=0
-KERNEL_OPTIONS += -DSOUND_MIXER=1
+##KERNEL_OPTIONS  = -DINTRO_LOGO=0 -DVIDEO_MODE=5 -DSCREEN_TILES_V=25 -DVRAM_TILES_V=25 -DCONTROLLERS_VSYNC_READ=0
+KERNEL_OPTIONS = -DVIDEO_MODE=42 -DM40_C64_GRAPHICS=1 -DM40_C64_MIXED=1 -DM40_C64_ALPHA=1 -DSCREEN_TILES_H=40 -DSCREEN_TILES_V=25 -DCONTROLLERS_VSYNC_READ=0
+KERNEL_OPTIONS += -DSOUND_MIXER=1 -DSCREEN_BORDER_V=12 
 
 UZEBIN_DIR = ../../../bin
 ## Options common to compile, link and assembly rules
@@ -54,16 +55,18 @@ LINKONLYOBJECTS =
 ## Include Directories
 INCLUDES = -I"$(KERNEL_DIR)" 
 
-RESOURCES = ../data/hack-font.inc
+#RESOURCES = ../data/hack-font.inc
+RESOURCES = ../data/c64-upper.inc
 
 ## Build
 all: $(RESOURCES) $(TARGET) $(GAME).hex $(GAME).eep $(GAME).lss $(GAME).uze size
 
 ## Rebuild graphics resources
-../data/hack-font.inc: ../data/hack-font.png ../data/hack-font.xml
-	$(UZEBIN_DIR)/gconvert ../data/hack-font.xml
+#../data/hack-font.inc: ../data/hack-font.png ../data/hack-font.xml
+#	$(UZEBIN_DIR)/gconvert ../data/hack-font.xml
 
-
+../data/c64-upper.inc: ../data/c64-upper.png ../data/c64-upper.xml
+	$(UZEBIN_DIR)/gconvert ../data/c64-upper.xml
 
 ## Compile Kernel files
 uzeboxVideoEngineCore.o: $(KERNEL_DIR)/uzeboxVideoEngineCore.s
