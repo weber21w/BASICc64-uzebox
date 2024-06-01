@@ -23,7 +23,7 @@
 #include <avr/pgmspace.h>
 #include <uzebox.h>
 //#include "data/hack-font.inc"
-#include "data/c64-upper.inc"
+//#include "data/c64-upper.inc"
 #include "data/scancodes.inc"
 
 #include "data/roms.inc"
